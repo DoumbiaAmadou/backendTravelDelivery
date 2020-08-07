@@ -1,76 +1,70 @@
 const express = require('express');
 const router = express();
-const mongoose = require('mongoose'); 
-const User = require('../models/user'); 
+const mongoose = require('mongoose');
+const User = require('../models/user');
 const { json } = require('express');
 const bcrypt = require('bcrypt');
+const user = require('../models/user');
 
-router.post('/signup', (req, res , next ) => {
-    console.log("----------"); 
-    bcrypt.hash(req.body.password , 10 , (err , hash) => {
+router.post('/signup', (req, res, next) => {
+    bcrypt.hash(req.body.password, 10, (err, hash) => {
 
-        if(err){
+        if (err) {
             return res.status(500).json({
-                error : err 
+                error: err
             });
-        }else {
+        } else {
             const user = new User({
                 _id: new mongoose.Types.ObjectId(),
-                email: req.body.email, 
-                name: req.body.name, 
-                firstName: req.body.firstName, 
-                city: req.body.city, 
-                password:hash,
+                email: req.body.email,
+                name: req.body.name,
+                firstName: req.body.firstName,
+                city: req.body.city,
+                password: hash,
             });
-            console.log(JSON.stringify(user)); 
+            console.log(JSON.stringify(user));
             user
-            .save()
-            .then(result => { 
-                res.status(201).json({
-                    message : "handling post request to /user/signup", 
-                    createdUser: user
+                .save()
+                .then(result => {
+                    res.status(201).json({
+                        message: "handling post request to /user/signup",
+                        createdUser: user
+                    })
                 })
-            })
-            .catch(err => {
-                console.log(err); 
-                res.status(500).json({
-                    error : err 
-                })
-            });
+                .catch(err => {
+                    console.log(err);
+                    res.status(500).json({
+                        error: err
+                    })
+                });
         }
     });
 });
 router.get("/:userId", (req, res) => {
-    const id = req.params.userId ; 
-    User.findById(id)
-    .exec()
-    .then(user => {
-        console.log(user)
-        if(user!= null){
-            delete user.password ; 
-           res.status(201).json(user)
-        }else{
-            res.status(404).json({error : 'No valid user found'}); 
-        }
-    })
-    .catch(err => {
-        console.log(err) ; 
-        res.status(500).json({error: err}); 
-    }); 
-
-});
-router.patch("/:userId", (req, res) => {
     const id = req.params.userId;
-    const updateOps  = {}; 
-    for(const ops of Object.keys(req.body)){
-        updateOps[ops] = req.body[ops] 
-    }
-    console.log(updateOps)
-    User.updateOne({ _id: id }, { $set: updateOps} )
+    User.findById(id)
         .exec()
-        .then(result => {
-            console.log(id,result)
-            res.status(201).json(result)
+        .then(user => {
+            console.log(user)
+            if (user == null) {
+                return res.status(404).json({ error: 'No valid user found' });
+            }
+            const { _id, email, name, firstName, city } = user;
+            const response = {
+                _id,
+                email,
+                name,
+                firstName,
+                city,
+                request: {
+                    type: 'GET',
+                    description: 'get all users ',
+                    url: '' + process.env.BASE_URL + 'user/'
+                }
+            }
+
+            res.status(201).json(response)
+
         })
         .catch(err => {
             console.log(err);
@@ -78,35 +72,97 @@ router.patch("/:userId", (req, res) => {
         });
 
 });
-router.delete("/:userId", (req, res , next) => {
+router.patch("/:userId", (req, res) => {
     const id = req.params.userId;
-    User.deleteOne({_id : id})
-    .exec()
-    .then(result =>{
-        res.status(200).json(result)
-    })
-    .catch(err => {
-        console.log(err) ; 
-        res.status(500).json({
-            error : err
+    const updateOps = {};
+    for (const ops of Object.keys(req.body)) {
+        updateOps[ops] = req.body[ops]
+    }
+    console.log(updateOps)
+    
+    if(updateOps.password){
+        bcrypt.hash(req.body.password, 10,  (err, hash) => {
+            if(err){
+                delete updateOps.password; 
+            }
+            updateOps.password = hash ;
+            User.updateOne({ _id: id }, { $set: updateOps })
+                .exec()
+                .then(result => {
+                    console.log(id, result)
+                    res.status(201).json({
+                        message: "user updated",
+                        request: {
+                            type: 'GET',
+                            url: '' + process.env.BASE_URL + 'user/'
+                        },
+                        response: result
+                    })
+                })
+                .catch(err => {
+                    console.log(err);
+                    res.status(500).json({ error: err });
+                }); 
+        }) 
+    }else {
+        User.updateOne({ _id: id }, { $set: updateOps })
+        .exec()
+        .then(result => {
+            console.log(id, result)
+            res.status(201).json({
+                message : "user updated", 
+                request : {
+                    type : 'GET',
+                    url: '' + process.env.BASE_URL + 'user/'
+                },
+                response: result
+            })
+        })
+        .catch(err => {
+            console.log(err);
+            res.status(500).json({ error: err });
         });
-    })
+    }   
+        
+});
+        
+router.delete("/:userId", (req, res, next) => {
+    const id = req.params.userId;
+    User.deleteOne({ _id: id })
+        .exec()
+        .then(result => {
+            res.status(200).json(result)
+        })
+        .catch(err => {
+            console.log(err);
+            res.status(500).json({
+                error: err
+            });
+        })
 });
 router.get("/", (req, res) => {
     const id = req.params.userId;
-    User.find()
+    User.find().select("-password")
         .exec()
         .then(users => {
-        
-            //no entries is not necessarily a error  
-            // if(users.length>=0){
-            // console.log(users)
-            res.status(201).json(users)
-            // }else{
-            //     res.status(200).json({
-            //          message : 'No Entries found'
-            //     })
-            // }
+            const response = {
+                count: users.length,
+                users: users.map(({ _id, email, name, firstName, city }) => ({
+                    _id,
+                    email,
+                    name,
+                    firstName,
+                    city,
+                    request: {
+                        type: 'GET',
+                        url: '' + process.env.BASE_URL + 'user/' + _id
+                    }
+                })
+                )
+            };
+            console.log(response)
+            res.status(201).json(response)
+         
         })
         .catch(err => {
             console.log(err);
