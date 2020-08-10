@@ -7,6 +7,7 @@ const bcrypt = require('bcrypt');
 const user = require('../models/user');
 
 router.post('/signup', (req, res, next) => {
+
     bcrypt.hash(req.body.password, 10, (err, hash) => {
 
         if (err) {
@@ -72,47 +73,36 @@ router.get("/:userId", (req, res) => {
         });
 
 });
+
 router.patch("/:userId", (req, res) => {
     const id = req.params.userId;
     const updateOps = {};
     for (const ops of Object.keys(req.body)) {
         updateOps[ops] = req.body[ops]
     }
-    console.log(updateOps)
-    
-    if(updateOps.password){
-        bcrypt.hash(req.body.password, 10,  (err, hash) => {
-            if(err){
-                delete updateOps.password; 
-            }
-            updateOps.password = hash ;
-            User.updateOne({ _id: id }, { $set: updateOps })
-                .exec()
-                .then(result => {
-                    console.log(id, result)
-                    res.status(201).json({
-                        message: "user updated",
-                        request: {
-                            type: 'GET',
-                            url: '' + process.env.BASE_URL + 'user/'
-                        },
-                        response: result
-                    })
-                })
-                .catch(err => {
-                    console.log(err);
-                    res.status(500).json({ error: err });
-                }); 
-        }) 
-    }else {
-        User.updateOne({ _id: id }, { $set: updateOps })
+
+    var extract
+    if (updateOps.password){
+       try {
+            updateOps.password = bcrypt.hashSync(updateOps.password, 10) 
+       } catch (error) {
+           delete user.password;
+       }   
+ 
+    }
+   
+    console.log("END =>", updateOps);
+
+
+
+    User.updateOne({ _id: id }, { $set: updateOps })
         .exec()
         .then(result => {
             console.log(id, result)
             res.status(201).json({
-                message : "user updated", 
-                request : {
-                    type : 'GET',
+                message: "user updated",
+                request: {
+                    type: 'GET',
                     url: '' + process.env.BASE_URL + 'user/'
                 },
                 response: result
@@ -122,10 +112,10 @@ router.patch("/:userId", (req, res) => {
             console.log(err);
             res.status(500).json({ error: err });
         });
-    }   
-        
-});
-        
+})
+
+
+
 router.delete("/:userId", (req, res, next) => {
     const id = req.params.userId;
     User.deleteOne({ _id: id })
@@ -153,6 +143,7 @@ router.get("/", (req, res) => {
                     name,
                     firstName,
                     city,
+                    password,
                     request: {
                         type: 'GET',
                         url: '' + process.env.BASE_URL + 'user/' + _id
@@ -160,9 +151,9 @@ router.get("/", (req, res) => {
                 })
                 )
             };
-            console.log(response)
+            console.log(JSON.stringify(response));
             res.status(201).json(response)
-         
+
         })
         .catch(err => {
             console.log(err);
