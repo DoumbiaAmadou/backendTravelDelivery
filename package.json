@@ -2,8 +2,9 @@
   "name": "backendtraveldelivery",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
+    "watch": "nodemon app.js",
     "start": "nodemon app.js"
   },
   "author": "",
@@ -14,9 +15,14 @@
     "express": "^4.17.1",
     "jsonwebtoken": "^8.5.1",
     "mongodb": "^3.6.0",
-    "mongoose": "^5.9.27",
+    "mongoose": "^5.13.4",
     "morgan": "^1.10.0",
     "multer": "^1.4.2",
     "nodemon": "^2.0.4"
+  },
+  "nodemonConfig": {
+    "delay": 2000,
+    "ignore": [],
+    "ext": "js,html"
   }
 }

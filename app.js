@@ -49,13 +49,14 @@ try {
 app.use('/user', userRoutes);
 app.use('/product', productsRoutes);
 app.use('/order', ordersRoutes);
-
+app.use('/uploads',express.static('uploads'));
 
 
 app.use('/', (req, res) => {
   console.log(' do some stuff in middleware ');
-  // res.send(' ROOT IS START')
-  res.redirect('/user')
+   res.send(' ROOT IS START')
+  // res.redirect('/root')
+
 });
 
 app.use((req, res, next) => {
