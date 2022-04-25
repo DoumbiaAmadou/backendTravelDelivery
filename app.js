@@ -14,21 +14,21 @@ app.use(bodyParser.json());
 app.use(morgan('dev'));
 
 // corps issues 
-app.use((req,res,next)=> {
-  res.header("Access-Control-Allow-Origin","*"); 
-  res.header("Access-Control-Allow-headers","Origin, X-Requested-With, Content-Type, Accept, Authorization"); 
-  
-  if(req.method === 'OPTIONS')
-  {
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
+
+  if (req.method === 'OPTIONS') {
     res.header('Access-Control-Allow-Methods', 'PUT, POST, GET, PATCH, DELETE');
-    return res.status(200).json({});  
+    return res.status(200).json({});
   }
-   next(); 
+  next();
 })
 
 // const router = require('./routes/posts'); 
 const userRoutes = require('./routes/user');
 const productsRoutes = require('./routes/products');
+const tripsRoutes = require('./routes/trips');
 const ordersRoutes = require('./routes/orders');
 
 
@@ -48,13 +48,14 @@ try {
 // app.use('/posts', router);
 app.use('/user', userRoutes);
 app.use('/product', productsRoutes);
+app.use('/trips', tripsRoutes);
 app.use('/order', ordersRoutes);
-app.use('/uploads',express.static('uploads'));
+app.use('/uploads', express.static('uploads'));
 
 
 app.use('/', (req, res) => {
   console.log(' do some stuff in middleware ');
-   res.send(' ROOT IS START')
+  res.send(' ROOT IS START')
   // res.redirect('/root')
 
 });

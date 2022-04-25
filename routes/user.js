@@ -10,42 +10,42 @@ const user = require('../models/user');
 
 router.post('/login', (req, res, next) => {
   User.find({ email: req.body.email })
-  .exec()
-  .then(users => { 
-    if(users.length <1){
-      return res.status(401).json({
-        message: "Auth Failed"
-      })
-    }
-    bcrypt.compare(req.body.password, users[0].password, (err, result) => {
-      if(err){
+    .exec()
+    .then(users => {
+      if (users.length < 1) {
         return res.status(401).json({
           message: "Auth Failed"
-        });
-      }
-      if(result){
-        const token = jwt.sign(
-          { email:users[0].email, userId: users[0]._id},
-          process.env.JWT_SECRET, 
-          {expiresIn: "1h"}); 
-          
-        return res.status(200).json({
-          message: "Auth succesful", 
-          token : token 
         })
       }
-      res.status(401).json({
-        message: "Auth Failed"
+      bcrypt.compare(req.body.password, users[0].password, (err, result) => {
+        if (err) {
+          return res.status(401).json({
+            message: "Auth Failed"
+          });
+        }
+        if (result) {
+          const token = jwt.sign(
+            { email: users[0].email, userId: users[0]._id },
+            process.env.JWT_SECRET,
+            { expiresIn: "1h" });
+
+          return res.status(200).json({
+            message: "Auth succesful",
+            token: token
+          })
+        }
+        res.status(401).json({
+          message: "Auth Failed"
+        })
       })
     })
-  })
-  .catch(
-    err => {
-      console.log(err); 
-      res.status(500).json({
-        error : err
-      })
-  });
+    .catch(
+      err => {
+        console.log(err);
+        res.status(500).json({
+          error: err
+        })
+      });
 
 
 });
@@ -54,8 +54,8 @@ router.post('/signup', (req, res, next) => {
   User.find({ email: req.body.email })
     .exec()
     .then(user => {
-      console.log(user); 
-      if (user.length>0) {
+      console.log(user);
+      if (user.length > 0) {
         res.status(409).json({
           message: "Mail Exists"
         })
@@ -72,6 +72,12 @@ router.post('/signup', (req, res, next) => {
               name: req.body.name,
               firstName: req.body.firstName,
               city: req.body.city,
+              name,
+              firstName,
+              city,
+              address: req.body.adress,
+              userStatus: req.body.userStatus,
+              cellphone: req.body.cellphone,
               password: hash,
             });
             console.log(JSON.stringify(user));
@@ -105,13 +111,16 @@ router.get("/:userId", (req, res) => {
       if (user == null) {
         return res.status(404).json({ error: 'No valid user found' });
       }
-      const { _id, email, name, firstName, city } = user;
+      const { _id, email, name, firstName, city, address, cellphone, userStatus } = user;
       const response = {
         _id,
         email,
         name,
         firstName,
         city,
+        address,
+        userStatus,
+        cellphone,
         request: {
           type: 'GET',
           description: 'get all users ',
@@ -136,7 +145,7 @@ router.patch("/:userId", (req, res) => {
     updateOps[ops] = req.body[ops]
   }
 
-  var extract
+
   if (updateOps.password) {
     try {
       updateOps.password = bcrypt.hashSync(updateOps.password, 10)
@@ -176,17 +185,17 @@ router.delete("/:userId", (req, res, next) => {
     .then(result => {
       console.log(result)
       var returnmessage = {
-        message : "User Deleted" 
+        message: "User Deleted"
       };
-      if(result.deletedCount==0){
-        returnmessage={
-          message : "No User Found! " 
-        };  
+      if (result.deletedCount == 0) {
+        returnmessage = {
+          message: "No User Found! "
+        };
       }
-      res.status(200).json(returnmessage) 
+      res.status(200).json(returnmessage)
     })
 
-    
+
     .catch(err => {
       console.log(err);
       res.status(500).json({
@@ -203,12 +212,15 @@ router.get("/", (req, res) => {
     .then(users => {
       const response = {
         count: users.length,
-        users: users.map(({ _id, email, name, firstName, city }) => ({
+        users: users.map(({ _id, email, name, firstName, city, address, userStatus, cellphone }) => ({
           _id,
           email,
           name,
           firstName,
           city,
+          address,
+          userStatus,
+          cellphone,
           request: {
             type: 'GET',
             url: '' + process.env.BASE_URL + 'user/' + _id
