@@ -35,10 +35,29 @@ router.get('/', (req, res, next) => {
     .then(trip => {
       const response = {
         count: trip.length,
-        trip: trip.map(({ _id, name, description, cityFrom,
-          cityTo, departureDate, arrivaldate, kiloPrice, avalaiblekilos, tripsStatus, reservation, images }) => ({
-            _id, name, description, cityFrom,
-            cityTo, departureDate, arrivaldate, kiloPrice, avalaiblekilos, tripsStatus, reservation, images,
+        trip: trip.map(({ _id, 
+          name, 
+          description, 
+          cityFrom,
+          cityTo,
+          departureDate, 
+          arrivaldate, 
+          kiloPrice, 
+          avalaiblekilos, 
+          tripsStatus, 
+          reservations, 
+          images }) => ({
+            _id, name, 
+            description, 
+            cityFrom,
+            cityTo, 
+            departureDate, 
+            arrivaldate, 
+            kiloPrice, 
+            avalaiblekilos, 
+            tripsStatus, 
+            reservations, 
+            images,
             request: {
               type: 'GET',
               url: '' + process.env.BASE_URL + 'trips/' + _id
@@ -60,24 +79,38 @@ router.get('/', (req, res, next) => {
 router.post('/', upload.array('tripsImage', 4), (req, res, next) => {
   //TODO   add file  url om trips here! 
   console.log('ici', req.files);
-  const { name, description,
-    cityFrom, cityTo,
-    departureDate, arrivaldate,
-    kiloPrice, avalaiblekilos, tripsStatus, reservation, images
+  const { name, 
+    description,
+    cityFrom, 
+    cityTo,
+    departureDate, 
+    arrivaldate,
+    kiloPrice, 
+    avalaiblekilos, 
+    tripsStatus, 
   } = req.body;
   const trips = new Trips({
     _id: new mongoose.Types.ObjectId(),
-    name, description, cityFrom, cityTo, departureDate, arrivaldate, kiloPrice, avalaiblekilos, tripsStatus, reservation,
+    name,
+    description, 
+    cityFrom, 
+    cityTo, 
+    departureDate, 
+    arrivaldate, 
+    kiloPrice, 
+    avalaiblekilos, 
+    tripsStatus, 
     images: req.files.map(({ path, destination, filename }) => {
       return process.env.BASE_URL + destination + filename;
     })
   });
-  console.log('cityFrom ' + req.body.cityFrom);
+  console.log('trips ' + trips);
   trips.save()
     .then((result) => {
       console.log("Saved", result);
     })
     .catch((err) => {
+      console.log('SERVER: '+err)
       res.status(401).json({
         message: " can not Create Porduct "
       })

@@ -9,8 +9,8 @@ const Reservation = new Schema({
 
 const tripsSchema = mongoose.Schema({
   _id: mongoose.Types.ObjectId,
-  name: String,
-  description: String,
+  name: { type: String},
+  description: { type: String},
   cityFrom: { type: String, required: true },
   cityTo: { type: String, required: true },
   departureDate: { type: Date, required: true },
@@ -18,8 +18,7 @@ const tripsSchema = mongoose.Schema({
   kiloPrice: Number,
   avalaiblekilos: Number,
   tripsStatus: String,
-  reservation: [{ type: Schema.Types.ObjectId, ref: 'Reservation' }],
-  images: 
-  Object
+  reservations:{type : [{ type: Schema.Types.ObjectId, ref: 'Reservations'}]  ,default: [] } ,
+  images: Object
 });
 module.exports = mongoose.model('Trips', tripsSchema); 
