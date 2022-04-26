@@ -3,69 +3,28 @@ const router = express();
 const mongoose = require('mongoose');
 const checkAuth = require('../middleware/check-auth');
 const Trips = require('../models/trips');
-const multer = require('multer');
+const upload = require('../middleware/multerHelper');
 const path = require('path')
 
 
-var storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, 'uploads/')
-  },
-  filename: function (req, file, cb) {
-    const match = ["image/png", "image/jpeg"];
-
-    if (match.indexOf(file.mimetype) === -1) {
-      return cb(new Error('file Not Accepted ' + file.mimetype), null)
-    }
-
-    let newFileName = Date.now() + file.originalname
-    cb(null, newFileName)
-
-  }
-
-})
-const customfilter = (req, file, cb) => {
-  console.log(file)
-}
-var upload = multer({ storage: storage, limits: { fileSize: 1080 * 1080 * 4 }, filter: customfilter })
 
 router.get('/', (req, res, next) => {
   Trips.find()
     .exec()
-    .then(trip => {
+    .then(trips => {
+
       const response = {
-        count: trip.length,
-        trip: trip.map(({ _id, 
-          name, 
-          description, 
-          cityFrom,
-          cityTo,
-          departureDate, 
-          arrivaldate, 
-          kiloPrice, 
-          avalaiblekilos, 
-          tripsStatus, 
-          reservations, 
-          images }) => ({
-            _id, name, 
-            description, 
-            cityFrom,
-            cityTo, 
-            departureDate, 
-            arrivaldate, 
-            kiloPrice, 
-            avalaiblekilos, 
-            tripsStatus, 
-            reservations, 
-            images,
-            request: {
-              type: 'GET',
-              url: '' + process.env.BASE_URL + 'trips/' + _id
-            }
-          })
+        count: trips.length,
+        trips: trips.map(t => ({
+          ...t.toJSON(),
+          request: {
+            type: 'GET',
+            url: '' + process.env.BASE_URL + 'trips/' + t._doc._id
+          }
+        })
         )
       };
-      console.log(JSON.stringify(response));
+      console.log(JSON.stringify("Trips =>   count: " + trips.length));
       res.status(201).json(response)
 
     })
@@ -77,40 +36,39 @@ router.get('/', (req, res, next) => {
 });
 
 router.post('/', upload.array('tripsImage', 4), (req, res, next) => {
-  //TODO   add file  url om trips here! 
-  console.log('ici', req.files);
-  const { name, 
+  //add file  url om trips here! 
+  const { name,
     description,
-    cityFrom, 
+    cityFrom,
     cityTo,
-    departureDate, 
+    departureDate,
     arrivaldate,
-    kiloPrice, 
-    avalaiblekilos, 
-    tripsStatus, 
+    kiloPrice,
+    avalaiblekilos,
+    tripsStatus,
   } = req.body;
   const trips = new Trips({
     _id: new mongoose.Types.ObjectId(),
     name,
-    description, 
-    cityFrom, 
-    cityTo, 
-    departureDate, 
-    arrivaldate, 
-    kiloPrice, 
-    avalaiblekilos, 
-    tripsStatus, 
+    description,
+    cityFrom,
+    cityTo,
+    departureDate,
+    arrivaldate,
+    kiloPrice,
+    avalaiblekilos,
+    tripsStatus,
     images: req.files.map(({ path, destination, filename }) => {
       return process.env.BASE_URL + destination + filename;
     })
   });
-  console.log('trips ' + trips);
+
   trips.save()
     .then((result) => {
       console.log("Saved", result);
     })
     .catch((err) => {
-      console.log('SERVER: '+err)
+      console.log('SERVER: ' + err)
       res.status(401).json({
         message: " can not Create Porduct "
       })
@@ -124,14 +82,19 @@ router.post('/', upload.array('tripsImage', 4), (req, res, next) => {
 
 router.get('/:tripsId', (req, res, next) => {
   const id = req.params.tripsId;
-  const trips = trips.findById(id)
+  const trips = Trips.findById(id)
     .exec()
-    .then(trips => {
-      if (trips == null) {
-        return res.status(404).json({ error: 'No valid trip found' });
+    .then(trip => {
+      if (trip == null) {
+        return res.status(404).json({ error: 'No valid trips found' });
       }
-      console.log(trips)
-      res.status(201).json(trips)
+      res.status(201).json({
+        ...trip._doc, request: {
+          type: 'GET',
+          description: 'get all Trips ',
+          url: '' + process.env.BASE_URL + 'trips/'
+        }
+      })
 
     })
     .catch(err => {
@@ -141,30 +104,55 @@ router.get('/:tripsId', (req, res, next) => {
     });
 });
 
-router.patch('/:tripsId', (req, res, next) => {
-  const id = req.params.tripsId;
-  if (id == 'special') {
-    res.status(200).json({
-      message: 'you discouvert the special'
-    });
-  } else {
-    res.status(201).json({
-      message: 'you can try again'
-    });
+router.patch('/:tripId', (req, res, next) => {
+  const id = req.params.tripId;
+  const updateOps = {};
+  for (const ops of Object.keys(req.body)) {
+    updateOps[ops] = req.body[ops]
   }
+  console.log("TRIPS " + id + " with update =>", updateOps);
+  Trips.updateOne({ _id: id }, { $set: updateOps })
+    .exec()
+    .then(result => {
+      console.log(id, result)
+      res.status(201).json({
+        message: "Product updated",
+        request: {
+          type: 'GET',
+          url: '' + process.env.BASE_URL + 'product/' + id
+        },
+        response: result
+      })
+    })
+    .catch(err => {
+      console.log(err);
+      res.status(500).json({ error: err });
+    });
 });
 
-router.delete('/:tripsId', (req, res, next) => {
-  const id = req.params.tripsId;
-  if (id == 'special') {
-    res.status(200).json({
-      message: 'you discouvert the special'
-    });
-  } else {
-    res.status(201).json({
-      message: 'you can try again'
-    });
-  }
+router.delete('/:tripId', checkAuth, (req, res, next) => {
+  const id = req.params.tripId;
+  Trips.deleteOne({ _id: id })
+    .exec()
+    .then(result => {
+      console.log(result.deletedCount)
+      var returnmessage = {
+        message: result.deletedCount + " Trip Deleted"
+      };
+      if (result.deletedCount == 0) {
+        returnmessage = {
+          message: "No Product Found! "
+        };
+      }
+      res.status(200).json(returnmessage)
+    }).catch(err => {
+      console.log(err);
+      res.status(500).json({
+        error: err
+      });
+    })
 });
+
+
 
 module.exports = router; 

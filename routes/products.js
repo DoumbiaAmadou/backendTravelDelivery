@@ -3,38 +3,8 @@ const router = express();
 const mongoose = require('mongoose');
 const checkAuth = require('../middleware/check-auth');
 const Product = require('../models/products');
-const multer = require('multer');
+const upload = require('../middleware/multerHelper');
 const path = require('path')
-
-
-var storage = multer.diskStorage({
-	destination: function (req, file, cb) {
-		cb(null, 'uploads/')
-	},
-	filename: function (req, file, cb) {
-		const match = ["image/png", "image/jpeg"];
-
-		if (match.indexOf(file.mimetype) === -1) {
-			return cb(new Error('file Not Accepted ' + file.mimetype), null)
-		}
-
-		let newFileName = new Date().toISOString().replace(/:/g, '-') + file.originalname
-		console.log('newFileName  ==>' + newFileName)
-		cb(null, newFileName)
-
-	}
-
-})
-const customfilter = (req, file, cb) => {
-	console.log(file)
-	if (file.minetype === 'image/jpeg' || file.minetype === 'image/png') {
-		cb(null, true);
-	} else {
-		cb(null, false);
-	}
-
-}
-var upload = multer({ storage: storage, limits: { fileSize: 1024 * 1024 * 9.5 }, filter: customfilter })
 
 router.get('/', (req, res, next) => {
 	Product.find()
@@ -114,28 +84,51 @@ router.get('/:productId', (req, res, next) => {
 
 router.patch('/:productId', (req, res, next) => {
 	const id = req.params.productId;
-	if (id == 'special') {
-		res.status(200).json({
-			message: 'you discouvert the special'
-		});
-	} else {
-		res.status(201).json({
-			message: 'you can try again'
-		});
+	const updateOps = {};
+	for (const ops of Object.keys(req.body)) {
+		updateOps[ops] = req.body[ops]
 	}
+	console.log(" 1 => ", updateOps);
+	Product.updateOne({ _id: id }, { $set: updateOps })
+		.exec()
+		.then(result => {
+			console.log(id, result)
+			res.status(201).json({
+				message: "Product updated",
+				request: {
+					type: 'GET',
+					url: '' + process.env.BASE_URL + 'product/' + id
+				},
+				response: result
+			})
+		})
+		.catch(err => {
+			console.log(err);
+			res.status(500).json({ error: err });
+		});
 });
 
-router.delete('/:productId', (req, res, next) => {
+router.delete('/:productId', checkAuth, (req, res, next) => {
 	const id = req.params.productId;
-	if (id == 'special') {
-		res.status(200).json({
-			message: 'you discouvert the special'
-		});
-	} else {
-		res.status(201).json({
-			message: 'you can try again'
-		});
-	}
+	Product.deleteOne({ _id: id })
+		.exec()
+		.then(result => {
+			console.log(result.deletedCount)
+			var returnmessage = {
+				message: result.deletedCount + " Product Deleted"
+			};
+			if (result.deletedCount == 0) {
+				returnmessage = {
+					message: "No Product Found! "
+				};
+			}
+			res.status(200).json(returnmessage)
+		}).catch(err => {
+			console.log(err);
+			res.status(500).json({
+				error: err
+			});
+		})
 });
 
 module.exports = router; 

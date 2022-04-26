@@ -48,7 +48,7 @@ try {
 // app.use('/posts', router);
 app.use('/user', userRoutes);
 app.use('/product', productsRoutes);
-app.use('/trips', tripsRoutes);
+app.use('/trip', tripsRoutes);
 app.use('/order', ordersRoutes);
 app.use('/uploads', express.static('uploads'));
 
