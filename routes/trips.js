@@ -16,7 +16,7 @@ router.get('/', (req, res, next) => {
       const response = {
         count: trips.length,
         trips: trips.map(t => ({
-          ...t.toJSON(),
+          ...(t.toJSON()),
           request: {
             type: 'GET',
             url: '' + process.env.BASE_URL + 'trips/' + t._doc._id
