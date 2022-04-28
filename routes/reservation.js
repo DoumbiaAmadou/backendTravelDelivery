@@ -3,81 +3,74 @@ const router = express();
 const mongoose = require('mongoose');
 const checkAuth = require('../middleware/check-auth');
 const { Trips, Reservation } = require('../models/trips');
+
 const upload = require('../middleware/multerHelper');
 const path = require('path')
 
 
 
 router.get('/', (req, res, next) => {
-  Trips.find()
-    .exec()
-    .then(trips => {
-
-      const response = {
-        count: trips.length,
-        trips: trips.map(t => ({
-          ...(t.toJSON()),
-          request: {
-            type: 'GET',
-            url: '' + process.env.BASE_URL + 'trips/' + t._doc._id
-          }
-        })
-        )
-      };
-      console.log(JSON.stringify("Trips =>   count: " + trips.length));
-      res.status(201).json(response)
-
-    })
-    .catch(err => {
-      console.log(err);
-      res.status(500).json({ error: err });
-    });
-
+  res.status(201).json({
+    'status': 'ERROR',
+    'message': ' add tripID and userId to find Reservation'
+  })
 });
 
-router.post('/', upload.array('tripsImage', 4), (req, res, next) => {
+//Post New Reservation and ad ID in   trip finded by tripId. 
+router.post('/', upload.any(), (req, res, next) => {
   //add file  url om trips here! 
-  const { name,
-    description,
-    cityFrom,
-    cityTo,
-    departureDate,
-    arrivaldate,
-    kiloPrice,
-    avalaiblekilos,
-    tripsStatus,
-  } = req.body;
-  const trips = new Trips({
-    _id: new mongoose.Types.ObjectId(),
-    name,
-    description,
-    cityFrom,
-    cityTo,
-    departureDate,
-    arrivaldate,
-    kiloPrice,
-    avalaiblekilos,
-    tripsStatus,
-    images: req.files.map(({ path, destination, filename }) => {
-      return process.env.BASE_URL + destination + filename;
-    })
-  });
 
-  trips.save()
-    .then((result) => {
-      console.log("Saved", result);
-    })
-    .catch((err) => {
+  const { tripId, kilosReserved, date_Res, name, firstName } = req.body;
+  console.log(req.body)
+
+  console.log({
+
+    tripId, kilosReserved, date_Res, name, firstName
+  });
+  var t = null;
+  Trips.findById(tripId)
+    .exec()
+    .then(trip => {
+      if (trip == null) {
+        return res.status(404).json({ error: 'No valid trips found with ' + tripId });
+      }
+      t = trip.toJSON();
+      console.log({
+        tripId, kilosReserved, date_Res, name, firstName,
+        priceTotal: kilosReserved * t.kiloPrice
+      });
+
+      const reservation = new Reservation({
+        _id: new mongoose.Types.ObjectId(),
+        firstName,
+        name,
+        kiloReservedPrice: t.kiloPrice,
+        kilosReserved,
+        date_Res,
+        priceTotal: kilosReserved * t.kiloPrice
+      })
+      return reservation.save()
+    }).then((result) => {
+      console.log(" Reservation Saved ", result);
+      console.log(' t.reservation =>' + t.reservations)
+      Trips.updateOne({ _id: tripId }, { $set: { reservations: [...t.reservations, result.toJSON()._id] } })
+        .exec().then(result => {
+          console.log(tripId, result)
+          res.status(201).json({
+            message: "Trip updated updated with reservation",
+            request: {
+              type: 'GET',
+              url: '' + process.env.BASE_URL + 'Trip/' + tripId
+            },
+            response: result
+          })
+        })
+    }).catch((err) => {
       console.log('SERVER: ' + err)
       res.status(401).json({
-        message: " can not Create Porduct "
+        message: "Can't Create Reservation \n" + err
       })
     })
-
-  res.status(201).json({
-    message: 'Handle POST Requests to /trips',
-    createdUser: trips
-  });
 });
 
 router.get('/:tripsId', (req, res, next) => {

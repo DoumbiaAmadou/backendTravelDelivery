@@ -29,40 +29,42 @@ app.use((req, res, next) => {
 const userRoutes = require('./routes/user');
 const productsRoutes = require('./routes/products');
 const tripsRoutes = require('./routes/trips');
+const reservation = require('./routes/reservation');
 const ordersRoutes = require('./routes/orders');
 
-var connectResponse = null; 
+var connectResponse = null;
 
 connectDB = async () => {
 
   // db connect 
   try {
-    connectResponse = await mongoose.connect(
+    await mongoose.connect(
       'mongodb+srv://' + process.env.DB_CONNECTION + '@spyro.jxmxs.gcp.mongodb.net/delivery?retryWrites=true&w=majority', {
-        useNewUrlParser: true,
-        useCreateIndex: true,
-        useUnifiedTopology: true
-      }).catch((e) => {
+      useNewUrlParser: true,
+      useCreateIndex: true,
+      useUnifiedTopology: true
+    }).then(result => {
+      if (result) connectResponse = true;
+    }).catch((e) => {
       console.log("connect : " + e.message)
     });
   } catch (err) {
     console.log("ERROR : " + JSON.stringify(err))
   }
+
+
+
 }
 connectDB();
 
 //routes
 // app.use('/posts', router);
-
-if (connectResponse) {
-  app.use('/user', userRoutes);
-  app.use('/product', productsRoutes);
-  app.use('/trip', tripsRoutes);
-  app.use('/order', ordersRoutes);
-  app.use('/uploads', express.static('uploads'));
-
-}
-
+app.use('/user', userRoutes);
+app.use('/product', productsRoutes);
+app.use('/reservation', reservation);
+app.use('/trip', tripsRoutes);
+app.use('/order', ordersRoutes);
+app.use('/uploads', express.static('uploads'));
 app.use('/', (req, res) => {
   console.log(' do some stuff in middleware ');
   res.send(' ROOT IS START - this the only root available actually we come soon! ')

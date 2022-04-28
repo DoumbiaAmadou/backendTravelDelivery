@@ -1,11 +1,11 @@
 const mongoose = require('mongoose'),
   Schema = mongoose.Schema
 
-
 const Reservation = new Schema({
   _id: mongoose.Types.ObjectId,
   name: String,
   kilosReserved: Number,
+  kiloReservedPrice: Number,
   priceTotal: Number,
   date_Res: Date,
 });
@@ -24,5 +24,7 @@ const tripsSchema = mongoose.Schema({
   reservations: { type: [{ type: Schema.Types.ObjectId, ref: 'Reservation' }], default: [] },
   images: Object
 });
-module.exports = mongoose.model('Reservation', Reservation);
-module.exports = mongoose.model('Trips', tripsSchema); 
+module.exports = {
+  Reservation: mongoose.model('Reservation', Reservation), Trips: mongoose.model('Trips', tripsSchema)
+}
+
