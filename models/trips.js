@@ -1,18 +1,24 @@
+
 const mongoose = require('mongoose'),
-  Schema = mongoose.Schema
+  Schema = mongoose.Schema;
+
+
 
 const Reservation = new Schema({
   _id: mongoose.Types.ObjectId,
   name: String,
   kilosReserved: Number,
   kiloReservedPrice: Number,
+  user: { type: mongoose.Types.ObjectId, ref: 'User' },
   priceTotal: Number,
   date_Res: Date,
+
 });
 
 const tripsSchema = mongoose.Schema({
   _id: mongoose.Types.ObjectId,
   name: { type: String },
+  user: { type: mongoose.Types.ObjectId, ref: 'User' },
   description: { type: String },
   cityFrom: { type: String, required: true },
   cityTo: { type: String, required: true },

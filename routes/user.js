@@ -23,9 +23,12 @@ router.post('/login', (req, res, next) => {
             message: "Auth Failed"
           });
         }
+        const { email, _id, userStatus } = users[0]
+        console.log({ email, userId: _id, userStatus })
+        console.log(result)
         if (result) {
           const token = jwt.sign(
-            { email: users[0].email, userId: users[0]._id },
+            { email, userId: _id, userStatus },
             process.env.JWT_SECRET,
             { expiresIn: "1h" });
 
@@ -51,6 +54,7 @@ router.post('/login', (req, res, next) => {
 });
 
 router.post('/signup', (req, res, next) => {
+  const { email, name, firstName, city, address, userStatus, cellphone, password } = req.body
   User.find({ email: req.body.email })
     .exec()
     .then(user => {
@@ -59,8 +63,13 @@ router.post('/signup', (req, res, next) => {
         res.status(409).json({
           message: "Mail Exists"
         })
+      } else if (!cellphone) {
+        res.status(409).json({
+          message: " cellephone Obligatoire",
+          error: " required failed"
+        })
       } else {
-        bcrypt.hash(req.body.password, 10, (err, hash) => {
+        bcrypt.hash(password, 10, (err, hash) => {
           if (err) {
             return res.status(500).json({
               error: err
@@ -68,16 +77,7 @@ router.post('/signup', (req, res, next) => {
           } else {
             const user = new User({
               _id: new mongoose.Types.ObjectId(),
-              email: req.body.email,
-              name: req.body.name,
-              firstName: req.body.firstName,
-              city: req.body.city,
-              name,
-              firstName,
-              city,
-              address: req.body.adress,
-              userStatus: req.body.userStatus,
-              cellphone: req.body.cellphone,
+              email, name, firstName, city, address, userStatus, cellphone,
               password: hash,
             });
             console.log(JSON.stringify(user));
