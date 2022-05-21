@@ -2,11 +2,12 @@ const express = require('express');
 const router = express();
 const mongoose = require('mongoose');
 const checkAuth = require('../middleware/check-auth');
+const checkRole = require('../middleware/check-role');
 const Product = require('../models/products');
 const upload = require('../middleware/multerHelper');
 const path = require('path')
 
-router.get('/', (req, res, next) => {
+router.get('/', checkRole, (req, res, next) => {
 	Product.find()
 		.exec()
 		.then(product => {

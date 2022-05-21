@@ -2,7 +2,7 @@ const express = require('express');
 const router = express();
 const mongoose = require('mongoose');
 const checkAuth = require('../middleware/check-auth');
-const Trips = require('../models/trips');
+const { Trips, Reservation } = require('../models/trips');
 const upload = require('../middleware/multerHelper');
 const path = require('path')
 
@@ -16,7 +16,7 @@ router.get('/', (req, res, next) => {
       const response = {
         count: trips.length,
         trips: trips.map(t => ({
-          ...t.toJSON(),
+          ...(t.toJSON()),
           request: {
             type: 'GET',
             url: '' + process.env.BASE_URL + 'trips/' + t._doc._id

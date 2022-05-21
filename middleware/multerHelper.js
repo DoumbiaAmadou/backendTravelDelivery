@@ -11,6 +11,7 @@ var storage = multer.diskStorage({
 		}
 		//TODO: check systems file naming limitation here! 
 		let newFileName = new Date().toISOString().replace(/:|[\s]/g, '-') + file.originalname
+		// let newFileName = (Date.now() + file.originalname).replace(/([\s]|:)/gm, '_')
 		console.log('newFileName  ==>' + newFileName)
 		cb(null, newFileName)
 
