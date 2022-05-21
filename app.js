@@ -33,11 +33,11 @@ const ordersRoutes = require('./routes/orders');
 
 var connectResponse = null; 
 
-connectDB = async () => {
+connectDB =  () => {
 
   // db connect 
   try {
-    connectResponse = await mongoose.connect(
+    connectResponse =  mongoose.connect(
       'mongodb+srv://' + process.env.DB_CONNECTION + '@spyro.jxmxs.gcp.mongodb.net/delivery?retryWrites=true&w=majority', {
         useNewUrlParser: true,
         useCreateIndex: true,
