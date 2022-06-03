@@ -9,6 +9,13 @@ const bcrypt = require('bcryptjs');
 const user = require('../models/user');
 
 router.post('/login', (req, res, next) => {
+  if(mongoose.connection.readyState != 1){
+    res.status(500).json({
+      error: ' DB : connexion Error ', 
+      status: 'KO'
+    })
+  }
+  
   User.find({ email: req.body.email })
     .exec()
     .then(users => {
@@ -20,10 +27,10 @@ router.post('/login', (req, res, next) => {
       bcrypt.compare(req.body.password, users[0].password, (err, result) => {
         if (err) {
           return res.status(401).json({
-            message: "Auth Failed"
+            message: "PasswordEncryption Failed"
           });
         }
-        const { email, _id, userStatus } = users[0]
+        const { name, email, address ,cellphone,  _id, userStatus ,firstName, city} = users[0]
         console.log({ email, userId: _id, userStatus })
         console.log(result)
         if (result) {
@@ -33,11 +40,22 @@ router.post('/login', (req, res, next) => {
             { expiresIn: "1h" });
 
           return res.status(200).json({
+            status : 'OK', 
+            name, 
+            email , 
+            address, 
+            cellphone, 
+            firstName,
+            city,
+            _id, 
+            userStatus ,
             message: "Auth succesful",
             token: token
           })
         }
         res.status(401).json({
+          status: "KO", 
+          statusCode: 401,
           message: "Auth Failed"
         })
       })
@@ -55,6 +73,7 @@ router.post('/login', (req, res, next) => {
 
 router.post('/signup', (req, res, next) => {
   const { email, name, firstName, city, address, userStatus, cellphone, password } = req.body
+  console.log(req.body)
   User.find({ email: req.body.email })
     .exec()
     .then(user => {

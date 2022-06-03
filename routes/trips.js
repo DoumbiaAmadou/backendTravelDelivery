@@ -9,6 +9,14 @@ const path = require('path')
 
 
 router.get('/', (req, res, next) => {
+  if(mongoose.connection.readyState != 1){
+    console.log("One"+mongoose.connection.readyState )
+    return res.status(500).json({
+      error: ' DB : connexion Error ', 
+      status: 'KO'
+    })
+    
+  }
   Trips.find()
     .exec()
     .then(trips => {
