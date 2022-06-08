@@ -50,7 +50,8 @@ router.post('/login', (req, res, next) => {
             _id, 
             userStatus ,
             message: "Auth succesful",
-            token: token
+            token: token , 
+            expirationDate : Date.now()+ (30*60*1000)
           })
         }
         res.status(401).json({
