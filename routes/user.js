@@ -23,9 +23,9 @@ router.post('/login', (req, res, next) => {
             message: "Auth Failed"
           });
         }
-        const { email, _id, userStatus } = users[0]
-        console.log({ email, userId: _id, userStatus })
-        console.log(result)
+
+        const { _id, city, email, cellphone, userStatus, firstName, name } = users[0];
+
         if (result) {
           const token = jwt.sign(
             { email, userId: _id, userStatus },
@@ -33,11 +33,14 @@ router.post('/login', (req, res, next) => {
             { expiresIn: "1h" });
 
           return res.status(200).json({
+            ok: true,
             message: "Auth succesful",
-            token: token
-          })
+            token: token,
+            user: { userId: _id, city, email, cellphone, userStatus, firstName, name }
+          });
         }
         res.status(401).json({
+          ok: false,
           message: "Auth Failed"
         })
       })
