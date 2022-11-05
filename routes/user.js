@@ -144,8 +144,6 @@ router.patch("/:userId", (req, res) => {
   for (const ops of Object.keys(req.body)) {
     updateOps[ops] = req.body[ops]
   }
-
-
   if (updateOps.password) {
     try {
       updateOps.password = bcrypt.hashSync(updateOps.password, 10)
