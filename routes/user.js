@@ -31,7 +31,7 @@ router.post('/login', (req, res, next) => {
           });
         }
 
-        const { _id, city, email, cellphone, userStatus, firstName, name } = users[0];
+        const { _id, city, email, cellphone, address , userStatus, firstName, name } = users[0];
 
         if (result) {
           const token = jwt.sign(

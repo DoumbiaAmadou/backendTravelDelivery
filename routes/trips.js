@@ -9,13 +9,13 @@ const path = require('path')
 
 
 router.get('/', (req, res, next) => {
-  if(mongoose.connection.readyState != 1){
-    console.log("One"+mongoose.connection.readyState )
+  if (mongoose.connection.readyState != 1) {
+    console.log("One" + mongoose.connection.readyState)
     return res.status(500).json({
-      error: ' DB : connexion Error ', 
+      error: ' DB : connexion Error ',
       status: 'KO'
     })
-    
+
   }
   Trips.find()
     .exec()
@@ -67,7 +67,7 @@ router.post('/', upload.array('tripsImage', 4), (req, res, next) => {
     avalaiblekilos,
     tripsStatus,
     images: req.files.map(({ path, destination, filename }) => {
-      return process.env.BASE_URL + destination + filename;
+      return destination + filename;
     })
   });
 
