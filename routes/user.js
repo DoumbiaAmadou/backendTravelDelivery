@@ -36,6 +36,7 @@ router.post('/login', (req, res, next) => {
             ok: true,
             message: "Auth succesful",
             token: token,
+            expiration: Date.now() + 1 * (60 * 60 * 1000),
             user: { userId: _id, city, email, cellphone, userStatus, firstName, name }
           });
         }
