@@ -24,6 +24,7 @@ app.use((req, res, next) => {
   }
   next();
 })
+var connectResponse = null;
 
 // const router = require('./routes/posts'); 
 const userRoutes = require('./routes/user');
@@ -32,13 +33,13 @@ const tripsRoutes = require('./routes/trips');
 const reservation = require('./routes/reservation');
 const ordersRoutes = require('./routes/orders');
 
-var connectResponse = null;
 
-connectDB = async () => {
+
+connectDB =  () => {
 
   // db connect 
   try {
-    await mongoose.connect(
+    connectResponse =  mongoose.connect(
       'mongodb+srv://' + process.env.DB_CONNECTION + '@spyro.jxmxs.gcp.mongodb.net/delivery?retryWrites=true&w=majority', {
       useNewUrlParser: true,
       useCreateIndex: true,
@@ -52,8 +53,6 @@ connectDB = async () => {
     console.log("ERROR : " + JSON.stringify(err))
   }
 
-
-
 }
 connectDB();
 
@@ -66,10 +65,14 @@ app.use('/trip', tripsRoutes);
 app.use('/order', ordersRoutes);
 app.use('/uploads', express.static('uploads'));
 app.use('/', (req, res) => {
-  console.log(' do some stuff in middleware ');
-  res.send(' ROOT IS START - this the only root available actually we come soon! ')
+  res.status(404).json({
+    error: {
+      message: 'route not found!'
+    }
+  });
+  // console.log(' do some stuff in middleware ');
+  // res.send(' ROOT IS START - this the only root available actually we come soon! ')
   // res.redirect('/root')
-
 });
 
 app.use((req, res, next) => {
