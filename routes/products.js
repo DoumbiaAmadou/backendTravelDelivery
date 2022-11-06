@@ -45,7 +45,7 @@ router.post('/', upload.array('avatarsProduct', 4), (req, res, next) => {
 		name: req.body.name,
 		price: req.body.price,
 		images: req.files.map(({ path, destination, filename }) => {
-			return process.env.BASE_URL + destination + filename;
+			return destination + filename;
 		})
 	});
 	product.save()
