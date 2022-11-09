@@ -1,4 +1,6 @@
 const express = require('express');
+import { Router, Request, Response, NextFunction , ErrorRequestHandler} from 'express';
+import { Error } from 'mongoose';
 var bodyParser = require('body-parser')
 require('dotenv/config');
 const app = express();
@@ -14,17 +16,16 @@ app.use(bodyParser.json());
 app.use(morgan('dev'));
 
 // corps issues 
-app.use((req, res, next) => {
+app.use((req: Request, res: Response, next: NextFunction) => {
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
-
   if (req.method === 'OPTIONS') {
     res.header('Access-Control-Allow-Methods', 'PUT, POST, GET, PATCH, DELETE');
     return res.status(200).json({});
   }
   next();
 })
-var connectResponse = null;
+let connectResponse : boolean = false;
 
 // const router = require('./routes/posts'); 
 const userRoutes = require('./routes/user');
@@ -35,7 +36,7 @@ const ordersRoutes = require('./routes/orders');
 
 
 
-connectDB =  () => {
+const connectDB : ()=>void   = () => {
 
   // db connect 
   try {
@@ -44,9 +45,10 @@ connectDB =  () => {
       useNewUrlParser: true,
       useCreateIndex: true,
       useUnifiedTopology: true
-    }).then(result => {
-      if (result) connectResponse = true;
-    }).catch((e) => {
+    }).then((result: any) => {
+      if (result) 
+        connectResponse = true;
+    }).catch((e : Error) => {
       console.log("connect : " + e.message)
     });
   } catch (err) {
@@ -54,8 +56,14 @@ connectDB =  () => {
   }
 
 }
+ 
+
 connectDB();
 
+interface customErrorHandler extends ErrorRequestHandler {
+  status : number, 
+  message: string
+};
 //routes
 // app.use('/posts', router);
 app.use('/user', userRoutes);
@@ -64,7 +72,7 @@ app.use('/reservation', reservation);
 app.use('/trip', tripsRoutes);
 app.use('/order', ordersRoutes);
 app.use('/uploads', express.static('uploads'));
-app.use('/', (req, res) => {
+app.use('/', (req: Request, res: Response,) => {
   res.status(404).json({
     error: {
       message: 'route not found!'
@@ -75,18 +83,11 @@ app.use('/', (req, res) => {
   // res.redirect('/root')
 });
 
-app.use((req, res, next) => {
+app.use((req : Request, res: Response, next: NextFunction) => {
   const error = new Error('Not found')
-  error.status = 404;
-  next(error);
+  req.statusCode = 404;
+  next(req);
 });
 
-app.use((error, req, res, next) => {
-  res.status(error.status || 500);
-  res.json({
-    error: {
-      message: error.message
-    }
-  });
-});
+
 app.listen(process.env.PORT || 3000);
