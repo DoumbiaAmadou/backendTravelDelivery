@@ -27,7 +27,7 @@ router.get('/', (req, res, next) => {
           ...(t.toJSON()),
           request: {
             type: 'GET',
-            url: '' + process.env.BASE_URL + 'trips/' + t._doc._id
+            url: '' + process.env.BASE_URL + '/trip/' + t._doc._id
           }
         })
         )
@@ -100,7 +100,7 @@ router.get('/:tripsId', (req, res, next) => {
         ...trip._doc, request: {
           type: 'GET',
           description: 'get all Trips ',
-          url: '' + process.env.BASE_URL + 'trips/'
+          url: '' + process.env.BASE_URL + '/trip/'
         }
       })
 
@@ -124,10 +124,10 @@ router.patch('/:tripId', (req, res, next) => {
     .then(result => {
       console.log(id, result)
       res.status(201).json({
-        message: "Product updated",
+        message: "Trip updated",
         request: {
           type: 'GET',
-          url: '' + process.env.BASE_URL + 'product/' + id
+          url: '' + process.env.BASE_URL + '/trip/' + id
         },
         response: result
       })
@@ -149,7 +149,7 @@ router.delete('/:tripId', checkAuth, (req, res, next) => {
       };
       if (result.deletedCount == 0) {
         returnmessage = {
-          message: "No Product Found! "
+          message: "No Trip Found! "
         };
       }
       res.status(200).json(returnmessage)

@@ -1,5 +1,7 @@
-import { Request, NextFunction, Response } from 'express';
-const multer = require('multer') ; 
+import { Request,  NextFunction, Response } from 'express';
+import multer, { FileFilterCallback } from 'multer'
+
+
 const express = require('express');
 const router = express();
 const mongoose = require('mongoose');
@@ -12,6 +14,8 @@ interface ReturnResponse {
 	count: number, 
 	product: Product []
 }
+type DestinationCallback = (error: Error | null, destination: string) => void
+type FileNameCallback = (error: Error | null, filename: string) => void
 interface Product {
 	_id:number,
 	name : string,
@@ -35,7 +39,7 @@ router.get('/', checkRole, (req : Request, res : Response, next: NextFunction) =
 					images,
 					request: {
 						type: 'GET',
-						url: '' + process.env.BASE_URL + 'product/' + _id
+						url: '' + process.env.BASE_URL + '/product/' + _id
 					}
 				})
 				)
@@ -50,16 +54,16 @@ router.get('/', checkRole, (req : Request, res : Response, next: NextFunction) =
 
 });
 
-router.post('/', upload.array('avatarsProduct', 4), (req: any, res: Response, next: NextFunction) => {
+router.post('/', upload.array('avatarsProduct', 4), (req: Request , res: Response, next: NextFunction) => {
 
 	//TODO   add file  url om product here!  
 	// console.log('ici', req.files);
-
+	const files = req.files as Express.Multer.File[]
 	const product = new Product({
 		_id: new mongoose.Types.ObjectId(),
 		name: req.body.name,
 		price: req.body.price,
-		images: req.files.map(({path, destination, filename} : any ) => {
+		images: files.map(({path, destination, filename} : any ) => {
 			return destination + filename;
 		})
 	});
@@ -113,7 +117,7 @@ router.patch('/:productId', (req: Request, res: Response, next: NextFunction) =>
 				message: "Product updated",
 				request: {
 					type: 'GET',
-					url: '' + process.env.BASE_URL + 'product/' + id
+					url: '' + process.env.BASE_URL + '/product/' + id
 				},
 				response: result
 			})
