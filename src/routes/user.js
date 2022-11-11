@@ -31,7 +31,7 @@ router.post('/login', (req, res, next) => {
           });
         }
 
-        const { _id, city, email, cellphone, address , userStatus, firstName, name } = users[0];
+        const { _id, city, email, cellphone, address, userStatus, firstName, name } = users[0];
 
         if (result) {
           const token = jwt.sign(
@@ -147,7 +147,7 @@ router.get("/:userId", (req, res) => {
         request: {
           type: 'GET',
           description: 'get all users ',
-          url: '' + process.env.BASE_URL + 'user/'
+          url: '' + process.env.BASE_URL + '/user/'
         }
       }
 
@@ -188,7 +188,7 @@ router.patch("/:userId", (req, res) => {
         message: "user updated",
         request: {
           type: 'GET',
-          url: '' + process.env.BASE_URL + 'user/'
+          url: '' + process.env.BASE_URL + '/user/'
         },
         response: result
       })
@@ -244,7 +244,7 @@ router.get("/", (req, res) => {
           cellphone,
           request: {
             type: 'GET',
-            url: '' + process.env.BASE_URL + 'user/' + _id
+            url: '' + process.env.BASE_URL + '/user/' + _id
           }
         })
         )

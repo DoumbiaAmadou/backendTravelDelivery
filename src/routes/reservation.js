@@ -100,7 +100,7 @@ router.post('/', upload.any(), checkAuth, (req, res, next) => {
             message: "Trip updated updated with reservation",
             request: {
               type: 'GET',
-              url: '' + process.env.BASE_URL + 'Trip/' + tripId
+              url: '' + process.env.BASE_URL + '/Trip/' + tripId
             },
             nModified: result.nModified
           })
@@ -125,7 +125,7 @@ router.get('/:resercationId', (req, res, next) => {
         ...reservation._doc, request: {
           type: 'GET',
           description: 'get all reservation ',
-          url: '' + process.env.BASE_URL + 'reservation/'
+          url: '' + process.env.BASE_URL + '/reservation/'
         }
       })
 
@@ -159,7 +159,7 @@ router.patch('/addkilo/:tripId', upload.any(), (req, res, next) => {
         message: "Res updated",
         request: {
           type: 'GET',
-          url: '' + process.env.BASE_URL + 'product/' + id
+          url: '' + process.env.BASE_URL + '/product/' + id
         },
         response: result
       })
