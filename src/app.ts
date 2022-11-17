@@ -35,7 +35,6 @@ const reservation = require('./routes/reservation');
 const ordersRoutes = require('./routes/orders');
 
 
-
 const connectDB : ()=>void   = () => {
 
   // db connect 
@@ -78,9 +77,7 @@ app.use('/', (req: Request, res: Response,) => {
       message: 'route not found!'
     }
   });
-  // console.log(' do some stuff in middleware ');
-  // res.send(' ROOT IS START - this the only root available actually we come soon! ')
-  // res.redirect('/root')
+
 });
 
 app.use((req : Request, res: Response, next: NextFunction) => {

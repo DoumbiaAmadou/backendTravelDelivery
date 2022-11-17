@@ -6,10 +6,10 @@
   "scripts": {
     "rimraf": "./node_modules/rimraf/bin.js",
     "buildProd": "tsc ",
-    "build": "rimraf ./build && tsc",
     "watch": "npm run build && nodemon /build/app.js",
     "start:dev": "nodemon",
-    "start": "npm install && npm run buildProd && nodemon /build/app.js"
+    "build": "rimraf ./build/* && tsc",
+    "start": " npm run build && cp -r ./uploads ./build/  && nodemon ./build/app.js"
   },
   "author": "",
   "license": "ISC",

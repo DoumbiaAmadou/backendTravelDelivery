@@ -15,7 +15,6 @@ router.get('/', (req, res, next) => {
       error: ' DB : connexion Error ',
       status: 'KO'
     })
-
   }
   Trips.find()
     .exec()
