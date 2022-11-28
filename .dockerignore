@@ -1,0 +1,8 @@
+node_modules
+package-lock.json
+.dockerfile
+Dockerfile
+.git
+yarn.lock
+cmd.md
+readme.md

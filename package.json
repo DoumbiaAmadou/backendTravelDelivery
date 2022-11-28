@@ -5,11 +5,11 @@
   "main": "app.js",
   "scripts": {
     "rimraf": "./node_modules/rimraf/bin.js",
-    "buildProd": "tsc ",
-    "watch": "npm run build && nodemon /build/app.js",
-    "start:dev": "nodemon",
+    "buildProd": "tsc  --watch --outDir ./build",
+    "watch": "npm run build && nodemon -L /build/app.js",
+    "start:dev": "nodemon -L src/app.ts",
     "build": "rimraf ./build/* && tsc",
-    "start": " npm run build && cp -r ./uploads ./build/  && nodemon ./build/app.js"
+    "start": "nodemon  -L src/app.ts"
   },
   "author": "",
   "license": "ISC",
