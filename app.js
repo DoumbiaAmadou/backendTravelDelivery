@@ -35,16 +35,16 @@ const ordersRoutes = require('./routes/orders');
 
 
 
-connectDB =  () => {
+connectDB = () => {
 
   // db connect 
   try {
-    connectResponse =  mongoose.connect(
+    connectResponse = mongoose.connect(
       'mongodb+srv://' + process.env.DB_CONNECTION + '@spyro.jxmxs.gcp.mongodb.net/delivery?retryWrites=true&w=majority', {
-      useNewUrlParser: true,
-      useCreateIndex: true,
-      useUnifiedTopology: true
-    }).then(result => {
+        useNewUrlParser: true,
+        useCreateIndex: true,
+        useUnifiedTopology: true
+      }).then(result => {
       if (result) connectResponse = true;
     }).catch((e) => {
       console.log("connect : " + e.message)

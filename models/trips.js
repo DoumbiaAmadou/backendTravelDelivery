@@ -12,7 +12,6 @@ const Reservation = new Schema({
   user: { type: mongoose.Types.ObjectId, ref: 'User' },
   priceTotal: Number,
   date_Res: Date,
-
 });
 
 const tripsSchema = mongoose.Schema({

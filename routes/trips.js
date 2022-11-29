@@ -2,20 +2,23 @@ const express = require('express');
 const router = express();
 const mongoose = require('mongoose');
 const checkAuth = require('../middleware/check-auth');
-const { Trips, Reservation } = require('../models/trips');
+const {
+  Trips,
+  Reservation
+} = require('../models/trips');
 const upload = require('../middleware/multerHelper');
 const path = require('path')
 
 
 
 router.get('/', (req, res, next) => {
-  if(mongoose.connection.readyState != 1){
-    console.log("One"+mongoose.connection.readyState )
+  if (mongoose.connection.readyState != 1) {
+    console.log("mongoose.connection.readyState:  " + mongoose.connection.readyState)
     return res.status(500).json({
-      error: ' DB : connexion Error ', 
+      error: ' DB : connexion Error ',
       status: 'KO'
     })
-    
+
   }
   Trips.find()
     .exec()
@@ -29,8 +32,7 @@ router.get('/', (req, res, next) => {
             type: 'GET',
             url: '' + process.env.BASE_URL + 'trips/' + t._doc._id
           }
-        })
-        )
+        }))
       };
       console.log(JSON.stringify("Trips =>   count: " + trips.length));
       res.status(201).json(response)
@@ -38,14 +40,17 @@ router.get('/', (req, res, next) => {
     })
     .catch(err => {
       console.log(err);
-      res.status(500).json({ error: err });
+      res.status(500).json({
+        error: err
+      });
     });
 
 });
 
 router.post('/', upload.array('tripsImage', 4), (req, res, next) => {
   //add file  url om trips here! 
-  const { name,
+  const {
+    name,
     description,
     cityFrom,
     cityTo,
@@ -66,7 +71,11 @@ router.post('/', upload.array('tripsImage', 4), (req, res, next) => {
     kiloPrice,
     avalaiblekilos,
     tripsStatus,
-    images: req.files.map(({ path, destination, filename }) => {
+    images: req.files.map(({
+      path,
+      destination,
+      filename
+    }) => {
       return process.env.BASE_URL + destination + filename;
     })
   });
@@ -94,10 +103,13 @@ router.get('/:tripsId', (req, res, next) => {
     .exec()
     .then(trip => {
       if (trip == null) {
-        return res.status(404).json({ error: 'No valid trips found' });
+        return res.status(404).json({
+          error: 'No valid trips found'
+        });
       }
       res.status(201).json({
-        ...trip._doc, request: {
+        ...trip._doc,
+        request: {
           type: 'GET',
           description: 'get all Trips ',
           url: '' + process.env.BASE_URL + 'trips/'
@@ -108,7 +120,9 @@ router.get('/:tripsId', (req, res, next) => {
     .catch(err => {
       console.log(err);
 
-      res.status(500).json({ error: err });
+      res.status(500).json({
+        error: err
+      });
     });
 });
 
@@ -119,7 +133,11 @@ router.patch('/:tripId', (req, res, next) => {
     updateOps[ops] = req.body[ops]
   }
   console.log("TRIPS " + id + " with update =>", updateOps);
-  Trips.updateOne({ _id: id }, { $set: updateOps })
+  Trips.updateOne({
+      _id: id
+    }, {
+      $set: updateOps
+    })
     .exec()
     .then(result => {
       console.log(id, result)
@@ -134,13 +152,17 @@ router.patch('/:tripId', (req, res, next) => {
     })
     .catch(err => {
       console.log(err);
-      res.status(500).json({ error: err });
+      res.status(500).json({
+        error: err
+      });
     });
 });
 
 router.delete('/:tripId', checkAuth, (req, res, next) => {
   const id = req.params.tripId;
-  Trips.deleteOne({ _id: id })
+  Trips.deleteOne({
+      _id: id
+    })
     .exec()
     .then(result => {
       console.log(result.deletedCount)
@@ -163,4 +185,4 @@ router.delete('/:tripId', checkAuth, (req, res, next) => {
 
 
 
-module.exports = router; 
+module.exports = router;
