@@ -1,4 +1,4 @@
-### Backend API to handle login, sesssion, reservation, annoncement.
+### Backend API to handle login, session, reservations, annoncements.
 ---
 ##### Table NoSQL
 
